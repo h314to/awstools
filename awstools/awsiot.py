@@ -5,9 +5,12 @@ import ConfigParser
 
 
 class AwsIoT:
-    """AWS IoT connection """
+    """
+    Simple AWS IoT API
+    """
 
-    def read_config(self, profile="default"):
+    @staticmethod
+    def read_config(profile="default"):
         # read the region from the user's configuration file, which should exist
         config = ConfigParser.RawConfigParser()
         try:
@@ -27,7 +30,8 @@ class AwsIoT:
             raise
         return region, key, secret
 
-    def create_thing(self, name):
+    @staticmethod
+    def create_thing(name):
         """
         Create a Thing in the configured region
         :param name: name of the Thing
@@ -36,15 +40,17 @@ class AwsIoT:
         response = sh.aws("iot", "create-thing", "--thing-name", name)
         return json.loads(str(response))
 
-    def delete_thing(self, thing):
+    @staticmethod
+    def delete_thing(thing):
         """
         Delete a Thing in the configured region
         :param thing: name of the Thing
         :return: None
         """
-        self.delete_thing_by_name(thing['thingName'])
+        AwsIoT.delete_thing_by_name(thing['thingName'])
 
-    def delete_thing_by_name(self, name):
+    @staticmethod
+    def delete_thing_by_name(name):
         """
         Delete a Thing in the configured region by specifying its name
         :param name: name of the Thing
@@ -52,15 +58,17 @@ class AwsIoT:
         """
         sh.aws("iot", "delete-thing", "--thing-name", name)
 
-    def describe_thing(self, thing):
+    @staticmethod
+    def describe_thing(thing):
         """
         Get Thing properties
         :param thing:  json properties of the Thing
         :return: dictionary with the Thing's description
         """
-        return self.describe_thing_by_name(thing['thingName'])
+        return AwsIoT.describe_thing_by_name(thing['thingName'])
 
-    def describe_thing_by_name(self, name):
+    @staticmethod
+    def describe_thing_by_name(name):
         """
         Get Thing properties by specifying its name
         :param name:  name of the Thing
@@ -69,7 +77,8 @@ class AwsIoT:
         response = sh.aws("iot", "describe-thing", "--thing-name", name)
         return json.loads(str(response))
 
-    def create_keys_and_certificate(self):
+    @staticmethod
+    def create_keys_and_certificate():
         """
         Create and activate keys and certificate
         :return: dictionary with the certificateArn, certificatePem, PublicKey, PrivateKey, and certificateId
@@ -77,15 +86,17 @@ class AwsIoT:
         response = sh.aws("iot", "create-keys-and-certificate", "--set-as-active")
         return json.loads(str(response))
 
-    def delete_certificate(self, cert):
+    @staticmethod
+    def delete_certificate(cert):
         """
         Inactivate and delete a certificate
         :param cert: the certificate json data
         :return: None
         """
-        self.delete_certificate_by_id(cert['certificateId'])
+        AwsIoT.delete_certificate_by_id(cert['certificateId'])
 
-    def delete_certificate_by_id(self, id):
+    @staticmethod
+    def delete_certificate_by_id(id):
         """
         Inactivate and delete a certificate with the given id
         :param id: the certificateID
@@ -94,15 +105,17 @@ class AwsIoT:
         sh.aws("iot", "update-certificate", "--certificate-id", id, "--new-status", "INACTIVE")
         sh.aws("iot", "delete-certificate", "--certificate-id", id)
 
-    def describe_certificate(self, cert):
+    @staticmethod
+    def describe_certificate(cert):
         """
         Get certificate info for the given id
         :param cert: the certificateId
         :return: dictionary with certificate properties
         """
-        return self.describe_certificate_by_id(cert['certificateId'])
+        return AwsIoT.describe_certificate_by_id(cert['certificateId'])
 
-    def describe_certificate_by_id(self, id):
+    @staticmethod
+    def describe_certificate_by_id(id):
         """
         Get certificate info for the given id
         :param id: the certificateId
@@ -111,7 +124,8 @@ class AwsIoT:
         response = sh.aws("iot", "describe-certificate", "--certificate-id", id)
         return json.loads(str(response))['certificateDescription']
 
-    def write_keys_and_certificates(self, cert, path=os.environ['PWD']):
+    @staticmethod
+    def write_keys_and_certificates(cert, path=os.environ['PWD']):
         """
         Write the certificate and keys to files
         :param cert: json with the certificate and keys

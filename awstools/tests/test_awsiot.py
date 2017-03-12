@@ -1,14 +1,12 @@
 import string
 import random
 import unittest
-from AwsIoT import AwsIoT
+from awstools import AwsIoT as iot
 
 
 class TestAwsIoT(unittest.TestCase):
     def test_create_and_delete_thing(self):
         """Test if Things can be accurately created and deleted"""
-
-        iot = AwsIoT()
 
         # generate a random name for the Thing
         name = "Thing-" + ''.join([random.choice(string.ascii_letters + string.digits) for n in xrange(8)])
@@ -28,7 +26,6 @@ class TestAwsIoT(unittest.TestCase):
             self.assertTrue("%s not found" % name in e.message)
 
     def test_create_and_delete_certificates(self):
-        iot = AwsIoT()
 
         # create certificate and check that the description is correct, and that it is active
         cert = iot.create_keys_and_certificate()
