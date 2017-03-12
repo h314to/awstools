@@ -3,8 +3,13 @@ import sh
 import json
 import ConfigParser
 
+
 def read_config(profile="default"):
-    # read the region from the user's configuration file, which should exist
+    """
+    Read the region and keys from the user's configuration files
+    :param profile: the profile from which to read data
+    :return: tuple with the region, the key, and the secret
+    """
     config = ConfigParser.RawConfigParser()
     try:
         config.read('%s/.aws/config' % os.environ['HOME'])
@@ -23,6 +28,7 @@ def read_config(profile="default"):
         raise
     return region, key, secret
 
+
 def create_thing(name):
     """
     Create a Thing in the configured region
@@ -32,6 +38,7 @@ def create_thing(name):
     response = sh.aws("iot", "create-thing", "--thing-name", name)
     return json.loads(str(response))
 
+
 def delete_thing(thing):
     """
     Delete a Thing in the configured region
@@ -39,6 +46,7 @@ def delete_thing(thing):
     :return: None
     """
     delete_thing_by_name(thing['thingName'])
+
 
 def delete_thing_by_name(name):
     """
@@ -48,6 +56,7 @@ def delete_thing_by_name(name):
     """
     sh.aws("iot", "delete-thing", "--thing-name", name)
 
+
 def describe_thing(thing):
     """
     Get Thing properties
@@ -55,6 +64,7 @@ def describe_thing(thing):
     :return: dictionary with the Thing's description
     """
     return describe_thing_by_name(thing['thingName'])
+
 
 def describe_thing_by_name(name):
     """
@@ -65,6 +75,7 @@ def describe_thing_by_name(name):
     response = sh.aws("iot", "describe-thing", "--thing-name", name)
     return json.loads(str(response))
 
+
 def create_keys_and_certificate():
     """
     Create and activate keys and certificate
@@ -73,6 +84,7 @@ def create_keys_and_certificate():
     response = sh.aws("iot", "create-keys-and-certificate", "--set-as-active")
     return json.loads(str(response))
 
+
 def delete_certificate(cert):
     """
     Inactivate and delete a certificate
@@ -80,6 +92,7 @@ def delete_certificate(cert):
     :return: None
     """
     delete_certificate_by_id(cert['certificateId'])
+
 
 def delete_certificate_by_id(id):
     """
@@ -90,6 +103,7 @@ def delete_certificate_by_id(id):
     sh.aws("iot", "update-certificate", "--certificate-id", id, "--new-status", "INACTIVE")
     sh.aws("iot", "delete-certificate", "--certificate-id", id)
 
+
 def describe_certificate(cert):
     """
     Get certificate info for the given id
@@ -97,6 +111,7 @@ def describe_certificate(cert):
     :return: dictionary with certificate properties
     """
     return describe_certificate_by_id(cert['certificateId'])
+
 
 def describe_certificate_by_id(id):
     """
@@ -106,6 +121,7 @@ def describe_certificate_by_id(id):
     """
     response = sh.aws("iot", "describe-certificate", "--certificate-id", id)
     return json.loads(str(response))['certificateDescription']
+
 
 def write_keys_and_certificates(cert, path=os.environ['PWD']):
     """
