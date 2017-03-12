@@ -14,16 +14,16 @@ class TestAwsIoT(unittest.TestCase):
         name = "Thing-" + ''.join([random.choice(string.ascii_letters + string.digits) for n in xrange(8)])
 
         # create the Thing
-        arn = iot.create_thing(name)
+        thing = iot.create_thing(name)
 
         # check if it was created correctly
-        thing_props = iot.describe_thing(name)
+        thing_props = iot.describe_thing(thing)
         self.assertEqual(name, thing_props['thingName'])
 
         # check if the Thing can be deleted
-        iot.delete_thing(name)
+        iot.delete_thing(thing)
         try:
-            iot.describe_thing(name)
+            iot.describe_thing(thing)
         except Exception as e:
             self.assertTrue("%s not found" % name in e.message)
 
@@ -32,15 +32,15 @@ class TestAwsIoT(unittest.TestCase):
 
         # create certificate and check that the description is correct, and that it is active
         cert = iot.create_keys_and_certificate()
-        cert_desc = iot.describe_certificate(cert['certificateId'])
+        cert_desc = iot.describe_certificate(cert)
         self.assertEqual(cert['certificateArn'], cert_desc['certificateArn'])
 
         self.assertEqual(cert_desc['status'], "ACTIVE")
 
         # delete a certificate and check
-        iot.delete_certificate(cert['certificateId'])
+        iot.delete_certificate(cert)
         try:
-            iot.describe_certificate(cert['certificateId'])
+            iot.describe_certificate(cert)
         except Exception as e:
             self.assertTrue("%s does not exist" % cert['certificateId'] in e.message)
 

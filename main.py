@@ -3,4 +3,11 @@
 from AwsIoT import AwsIoT
 
 iot = AwsIoT()
-iot.create_thing("Test1")
+
+
+cert = iot.create_keys_and_certificate()
+print cert
+print cert['certificateId']
+desc = iot.describe_certificate(cert)
+print desc
+iot.delete_certificate(cert)
