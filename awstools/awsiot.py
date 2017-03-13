@@ -108,7 +108,22 @@ def delete_certificate_by_id(id):
     :param id: the certificateID
     :return: None
     """
+    # inactivate certificate
     sh.aws("iot", "update-certificate", "--certificate-id", id, "--new-status", "INACTIVE")
+
+    arn = describe_certificate_by_id(id)["certificateArn"]
+
+    # detach all policies
+    policies_data = json.loads(str(sh.aws("iot", "list-principal-policies", "--principal", arn)))
+    for policy in policies_data["policies"]:
+        sh.aws("iot", "detach-principal-policy", "--policy-name", policy["policyName"], "--principal", arn)
+
+    # detach all things
+    things_data = json.loads(str(sh.aws("iot", "list-principal-things", "--principal", arn)))
+    for thing in things_data["things"]:
+        sh.aws("iot", "detach-thing-principal", "--thing-name", thing, "--principal", arn)
+
+    # we safely delete certificate now
     sh.aws("iot", "delete-certificate", "--certificate-id", id)
 
 
@@ -179,7 +194,7 @@ def create_policy_from_string(name, doc):
     return json.loads(str(response))
 
 
-def get_policy(policy):
+def describe_policy(policy):
     """
     Get policy document (json)
     :param name: policy name
@@ -188,7 +203,7 @@ def get_policy(policy):
     return get_policy_by_name(policy['policyName'])
 
 
-def get_policy_by_name(name):
+def describe_policy_by_name(name):
     """
     Get policy document (json) by specifying its name
     :param name: policy name
@@ -214,3 +229,43 @@ def delete_policy_by_name(name):
     :return: None
     """
     sh.aws("iot", "delete-policy", "--policy-name", name)
+
+
+def attach_policy(certificate, policy):
+    """
+    Attach a policy to a certificate
+    :param certificate: certificate json data
+    :param policy: policy json data
+    :return: None
+    """
+    attach_policy_by_arn_and_name(certificate["certificateArn"], policy["policyName"])
+
+
+def attach_policy_by_arn_and_name(certificate_arn, policy_name):
+    """
+    Attach a policy to a certificate (using arn and name)
+    :param certificate_arn: arn of the certificate
+    :param policy_name: the policy hame
+    :return:
+    """
+    sh.aws("iot", "attach-principal-policy", "--principal", certificate_arn, "--policy-name", policy_name)
+
+
+def attach_to_thing(thing, certificate):
+    """
+    Attach certificate to a thing
+    :param thing: thing json data
+    :param certificate: certificate json data
+    :return: None
+    """
+    attach_to_thing_by_arn_and_name(thing["thingName"], certificate["certificateArn"])
+
+
+def attach_to_thing_by_arn_and_name(thing_name, certificate_arn):
+    """
+    Attach certificate to a thing (using arn and name)
+    :param certificate_arn: arn of the certificate
+    :param thing_name: the thing hame
+    :return:
+    """
+    sh.aws("iot", "attach-thing-principal", "--principal", certificate_arn, "--thing-name", thing_name)
