@@ -8,10 +8,8 @@ def read_config(profile="default"):
     """
     Read the region and keys from the user's configuration files
 
-    :param profile:
-        the profile from which to read data
-    :return:
-        tuple with the id, region, key, and secret
+    :param profile: the profile from which to read data
+    :return: tuple with the id, region, key, and secret
     """
     awsid = sh.aws("sts", "get-caller-identity", "--output", "text", "--query", "Account").strip()
 

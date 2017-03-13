@@ -99,6 +99,9 @@ class TestAwsIoT(unittest.TestCase):
         except Exception as e:
             self.assertTrue("%s does not exist" % certs['certificateId'] in e.message)
 
+        iot.delete_policy(policy)
+        iot.delete_thing(thing)
+
 
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestAwsIoT)
