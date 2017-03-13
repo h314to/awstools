@@ -6,3 +6,12 @@
 
 # Python egg metadata, regenerated from source files by setuptools.
 /*.egg-info
+
+# builddir
+build/
+
+# documents
+docs/_build_html/
+docs/_build/
+docs/_static/
+docs/_templates/

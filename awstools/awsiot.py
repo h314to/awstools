@@ -7,8 +7,11 @@ import ConfigParser
 def read_config(profile="default"):
     """
     Read the region and keys from the user's configuration files
-    :param profile: the profile from which to read data
-    :return: tuple with the id, region, key, and secret
+
+    :param profile:
+        the profile from which to read data
+    :return:
+        tuple with the id, region, key, and secret
     """
     awsid = sh.aws("sts", "get-caller-identity", "--output", "text", "--query", "Account").strip()
 
@@ -33,6 +36,11 @@ def read_config(profile="default"):
 
 
 def arn_base():
+    """
+    Get the Amazon Resource Name (ARN) prefix for IoT
+
+    :return: the ARN prefix
+    """
     awsid, region, key, secret = read_config()
     return "arn:aws:iot:%s:%s:" % (region, awsid)
 
@@ -40,6 +48,7 @@ def arn_base():
 def create_thing(name):
     """
     Create a Thing in the configured region
+
     :param name: name of the Thing
     :return: the properties of this thing
     """
@@ -50,6 +59,7 @@ def create_thing(name):
 def delete_thing(thing):
     """
     Delete a Thing in the configured region
+
     :param thing: name of the Thing
     :return: None
     """
@@ -59,6 +69,7 @@ def delete_thing(thing):
 def delete_thing_by_name(name):
     """
     Delete a Thing in the configured region by specifying its name
+
     :param name: name of the Thing
     :return: None
     """
@@ -68,6 +79,7 @@ def delete_thing_by_name(name):
 def describe_thing(thing):
     """
     Get Thing properties
+
     :param thing:  json properties of the Thing
     :return: dictionary with the Thing's description
     """
@@ -77,6 +89,7 @@ def describe_thing(thing):
 def describe_thing_by_name(name):
     """
     Get Thing properties by specifying its name
+
     :param name:  name of the Thing
     :return: dictionary with the Thing's description
     """
@@ -87,6 +100,7 @@ def describe_thing_by_name(name):
 def create_keys_and_certificate():
     """
     Create and activate keys and certificate
+
     :return: dictionary with the certificateArn, certificatePem, PublicKey, PrivateKey, and certificateId
     """
     response = sh.aws("iot", "create-keys-and-certificate", "--set-as-active")
@@ -96,6 +110,7 @@ def create_keys_and_certificate():
 def delete_certificate(cert):
     """
     Inactivate and delete a certificate
+
     :param cert: the certificate json data
     :return: None
     """
@@ -105,6 +120,7 @@ def delete_certificate(cert):
 def delete_certificate_by_id(id):
     """
     Inactivate and delete a certificate with the given id
+
     :param id: the certificateID
     :return: None
     """
@@ -130,6 +146,7 @@ def delete_certificate_by_id(id):
 def describe_certificate(cert):
     """
     Get certificate info for the given id
+
     :param cert: the certificateId
     :return: dictionary with certificate properties
     """
@@ -139,6 +156,7 @@ def describe_certificate(cert):
 def describe_certificate_by_id(id):
     """
     Get certificate info for the given id
+
     :param id: the certificateId
     :return: dictionary with certificate properties
     """
@@ -149,6 +167,7 @@ def describe_certificate_by_id(id):
 def write_keys_and_certificates(cert, path=os.environ['PWD']):
     """
     Write the certificate and keys to files
+
     :param cert: json with the certificate and keys
     :param path: output path (default: $PWD)
     :return: None
@@ -186,6 +205,7 @@ def create_policy(name, effect, action, topic):
 def create_policy_from_string(name, doc):
     """
     Create a policy
+
     :param name: policy name
     :param doc: json document string describing the policy
     :return: dictionary with the policy properties
@@ -197,6 +217,7 @@ def create_policy_from_string(name, doc):
 def describe_policy(policy):
     """
     Get policy document (json)
+
     :param name: policy name
     :return: dictionary with the policy properties
     """
@@ -206,6 +227,7 @@ def describe_policy(policy):
 def describe_policy_by_name(name):
     """
     Get policy document (json) by specifying its name
+
     :param name: policy name
     :return: dictionary with the policy properties
     """
@@ -216,6 +238,7 @@ def describe_policy_by_name(name):
 def delete_policy(policy):
     """
     Delete a policy
+
     :param policy: policy properties dictionary
     :return: None
     """
@@ -225,6 +248,7 @@ def delete_policy(policy):
 def delete_policy_by_name(name):
     """
     Delete a policy by specifying its name
+
     :param name: policy name
     :return: None
     """
@@ -234,6 +258,7 @@ def delete_policy_by_name(name):
 def attach_policy(certificate, policy):
     """
     Attach a policy to a certificate
+
     :param certificate: certificate json data
     :param policy: policy json data
     :return: None
@@ -244,6 +269,7 @@ def attach_policy(certificate, policy):
 def attach_policy_by_arn_and_name(certificate_arn, policy_name):
     """
     Attach a policy to a certificate (using arn and name)
+
     :param certificate_arn: arn of the certificate
     :param policy_name: the policy hame
     :return:
@@ -254,6 +280,7 @@ def attach_policy_by_arn_and_name(certificate_arn, policy_name):
 def attach_to_thing(thing, certificate):
     """
     Attach certificate to a thing
+
     :param thing: thing json data
     :param certificate: certificate json data
     :return: None
@@ -264,6 +291,7 @@ def attach_to_thing(thing, certificate):
 def attach_to_thing_by_arn_and_name(thing_name, certificate_arn):
     """
     Attach certificate to a thing (using arn and name)
+
     :param certificate_arn: arn of the certificate
     :param thing_name: the thing hame
     :return:
