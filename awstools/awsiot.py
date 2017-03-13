@@ -8,9 +8,12 @@ def read_config(profile="default"):
     """
     Read the region and keys from the user's configuration files
     :param profile: the profile from which to read data
-    :return: tuple with the region, the key, and the secret
+    :return: tuple with the id, region, key, and secret
     """
+    awsid = sh.aws("sts", "get-caller-identity", "--output", "text", "--query", "Account").strip()
+
     config = ConfigParser.RawConfigParser()
+
     try:
         config.read('%s/.aws/config' % os.environ['HOME'])
         region = config.get(profile, 'region')
@@ -26,7 +29,12 @@ def read_config(profile="default"):
     except:
         print "Error reading the '~/.aws/credentials' file."
         raise
-    return region, key, secret
+    return awsid, region, key, secret
+
+
+def arn_base():
+    awsid, region, key, secret = read_config()
+    return "arn:aws:iot:%s:%s:" % (region, awsid)
 
 
 def create_thing(name):
@@ -144,3 +152,65 @@ def write_keys_and_certificates(cert, path=os.environ['PWD']):
     privatekey_file = open("%s-private.pem.key" % base_filename, 'w')
     privatekey_file.write(cert['keyPair']['PrivateKey'])
     privatekey_file.close()
+
+
+def create_policy(name, effect, action, topic):
+    """
+
+    :param name: policy name
+    :param effect: policy effect ("Allow" or "Deny")
+    :param action: action allowed or denied by policy (e.g. "iot:Publish", "iot:Connect", "iot:Subscribe")
+    :param topic: topic on which the policy takes effect
+    :return: dictionary with the policy properties
+    """
+    policy = dict(Version="2012-10-17")
+    policy["Statement"] = [dict(Effect=effect, Action=[action], Resource=[arn_base() + "topic/" + topic])]
+    return create_policy_from_string(name, str(json.dumps(policy)))
+
+
+def create_policy_from_string(name, doc):
+    """
+    Create a policy
+    :param name: policy name
+    :param doc: json document string describing the policy
+    :return: dictionary with the policy properties
+    """
+    response = sh.aws("iot", "create-policy", "--policy-name", name, "--policy-document", doc)
+    return json.loads(str(response))
+
+
+def get_policy(policy):
+    """
+    Get policy document (json)
+    :param name: policy name
+    :return: dictionary with the policy properties
+    """
+    return get_policy_by_name(policy['policyName'])
+
+
+def get_policy_by_name(name):
+    """
+    Get policy document (json) by specifying its name
+    :param name: policy name
+    :return: dictionary with the policy properties
+    """
+    response = sh.aws("iot", "get-policy", "--policy-name", name)
+    return json.loads(str(response))
+
+
+def delete_policy(policy):
+    """
+    Delete a policy
+    :param policy: policy properties dictionary
+    :return: None
+    """
+    delete_policy_by_name(policy['policyName'])
+
+
+def delete_policy_by_name(name):
+    """
+    Delete a policy by specifying its name
+    :param name: policy name
+    :return: None
+    """
+    sh.aws("iot", "delete-policy", "--policy-name", name)
